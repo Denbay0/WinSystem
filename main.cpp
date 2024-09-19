@@ -1,57 +1,94 @@
+// main.cpp
 #include "WinSystemInfo.h"
 #include <iostream>
-#include <vector>
-
-void printNetworkInfo(const std::vector<WinSystemInfo::NetworkInfo>& networks) {
-    std::cout << "Network Information:" << std::endl;
-    for (const auto& network : networks) {
-        std::cout << "Network Type: "
-            << (network.type == WinSystemInfo::NetworkType::Wired ? "Wired" :
-                network.type == WinSystemInfo::NetworkType::Wireless ? "Wireless" : "Unknown")
-            << ", Protocol: " << network.protocol << std::endl;
-    }
-}
-
-void printMemoryInfo(const WinSystemInfo::MemoryInfo& info) {
-    std::cout << "Memory Information:" << std::endl;
-    std::cout << "Total Memory: " << info.totalMemoryMB << " MB" << std::endl;
-    std::cout << "Type: " << (info.type == WinSystemInfo::MemoryType::DDR ? "DDR" :
-        info.type == WinSystemInfo::MemoryType::DDR2 ? "DDR2" :
-        info.type == WinSystemInfo::MemoryType::DDR3 ? "DDR3" :
-        info.type == WinSystemInfo::MemoryType::DDR4 ? "DDR4" :
-        info.type == WinSystemInfo::MemoryType::DDR5 ? "DDR5" : "Unknown") << std::endl;
-    std::cout << "Speed: " << info.speedMHz << " MHz" << std::endl;
-    std::cout << "Occupied Slots: " << info.occupiedSlots << std::endl;
-    std::cout << "Free Slots: " << info.freeSlots << std::endl;
-}
-
-void printCPUInfo(const WinSystemInfo::CPUInfo& info) {
-    std::cout << "CPU Information:" << std::endl;
-    std::cout << "Manufacturer: " << info.manufacturer << std::endl;
-    std::cout << "Frequency: " << info.frequencyMHz << " MHz" << std::endl;
-    std::cout << "Cores: " << info.cores << std::endl;
-    std::cout << "Threads: " << info.threads << std::endl;
-    std::cout << "Virtualization: " << (info.virtualizationEnabled ? "Enabled" : "Disabled") << std::endl;
-}
-
-void printVirtualizationInfo(const WinSystemInfo::VirtualizationInfo& info) {
-    std::cout << "Virtualization Information:" << std::endl;
-    std::cout << "Virtual Machine: " << (info.isVirtualMachine ? "Yes" : "No") << std::endl;
-    std::cout << "Hypervisor Type: " << info.hypervisorType << std::endl; 
-}
 
 int main() {
-    WinSystemInfo systemInfo;
+    SystemInfo sysInfo;
+    if (!sysInfo.Initialize()) {
+        std::cerr << "Не удалось инициализировать SystemInfo." << std::endl;
+        return 1;
+    }
 
-    auto networkInfo = systemInfo.getNetworkInfo();
-    auto memoryInfo = systemInfo.getMemoryInfo();
-    auto cpuInfo = systemInfo.getCPUInfo();
-    auto virtualizationInfo = systemInfo.getVirtualizationInfo();
+    // Получение информации о CPU
+    CPUInfo cpu;
+    if (sysInfo.GetCPUInfo(cpu)) {
+        std::cout << "Производитель CPU: " << cpu.Manufacturer << std::endl;
+        std::cout << "Частота CPU: " << cpu.FrequencyGHz << " GHz" << std::endl;
+        std::cout << "Серийный номер CPU: " << cpu.SerialNumber << std::endl;
+        std::cout << "Количество ядер CPU: " << cpu.CoreCount << std::endl;
+        std::cout << "Количество потоков CPU: " << cpu.ThreadCount << std::endl;
+        std::cout << "Виртуализация включена: " << (cpu.VirtualizationEnabled ? "Да" : "Нет") << std::endl;
+    }
+    else {
+        std::cerr << "Не удалось получить информацию о CPU." << std::endl;
+    }
 
-    printNetworkInfo(networkInfo);
-    printMemoryInfo(memoryInfo);
-    printCPUInfo(cpuInfo);
-    printVirtualizationInfo(virtualizationInfo);
+    // Получение информации о RAM
+    RAMInfo ram;
+    if (sysInfo.GetRAMInfo(ram)) {
+        std::cout << "Общая ОЗУ: " << ram.TotalMemoryMB << " MB" << std::endl;
+        std::cout << "Тип памяти: " << ram.MemoryType << std::endl;
+        std::cout << "Скорость памяти: " << ram.SpeedMHz << " MHz" << std::endl;
+        std::cout << "Использованные слоты: " << ram.UsedSlots << std::endl;
+        std::cout << "Свободные слоты: " << ram.FreeSlots << std::endl;
+    }
+    else {
+        std::cerr << "Не удалось получить информацию о RAM." << std::endl;
+    }
+
+    // Получение информации о сетевых подключениях
+    std::vector<NetworkInfo> networks;
+    if (sysInfo.GetNetworkInfo(networks)) {
+        for (const auto& net : networks) {
+            std::cout << "Тип сетевого подключения: ";
+            switch (net.ConnectionType) {
+            case NetworkConnectionType::Wired:
+                std::cout << "Проводное";
+                break;
+            case NetworkConnectionType::Wireless:
+                std::cout << "Беспроводное";
+                break;
+            default:
+                std::cout << "Неизвестно";
+            }
+            std::cout << ", Протокол: " << net.Protocol << std::endl;
+        }
+    }
+    else {
+        std::cerr << "Не удалось получить информацию о сетевых подключениях." << std::endl;
+    }
+
+    // Получение информации о виртуализации
+    VirtualizationInfo virt;
+    if (sysInfo.GetVirtualizationInfo(virt)) {
+        std::cout << "Виртуализирована: " << (virt.IsVirtualized ? "Да" : "Нет") << std::endl;
+        if (virt.IsVirtualized) {
+            std::cout << "Тип гипервизора: ";
+            switch (virt.Type) {
+            case HypervisorType::VMware:
+                std::cout << "VMware";
+                break;
+            case HypervisorType::HyperV:
+                std::cout << "Hyper-V";
+                break;
+            case HypervisorType::VirtualBox:
+                std::cout << "VirtualBox";
+                break;
+            case HypervisorType::KVM:
+                std::cout << "KVM";
+                break;
+            case HypervisorType::Xen:
+                std::cout << "Xen";
+                break;
+            default:
+                std::cout << "Другое";
+            }
+            std::cout << std::endl;
+        }
+    }
+    else {
+        std::cerr << "Не удалось получить информацию о виртуализации." << std::endl;
+    }
 
     return 0;
 }
