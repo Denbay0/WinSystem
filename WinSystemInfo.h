@@ -2,56 +2,73 @@
 
 #include <string>
 #include <vector>
-#include <windows.h>
-#include <Psapi.h>
-#include <intrin.h>
+#include <cstdint>
+#include <Wbemidl.h> 
+#include <comdef.h>  
 
-class WinSystemInfo {
-public:
-    enum class NetworkType {
-        Wired,
-        Wireless,
-        Unknown
-    };
 
-    enum class MemoryType {
-        DDR,
-        DDR2,
-        DDR3,
-        DDR4,
-        DDR5,
-        Unknown
-    };
-
-    struct NetworkInfo {
-        NetworkType type;
-        std::string protocol;
-    };
-
-    struct CPUInfo {
-        std::string manufacturer;
-        unsigned int frequencyMHz;
-        unsigned int cores;
-        unsigned int threads;
-        bool virtualizationEnabled;
-    };
-
-    struct MemoryInfo {
-        unsigned long long totalMemoryMB;
-        MemoryType type;
-        unsigned int speedMHz; 
-        unsigned int occupiedSlots; 
-        unsigned int freeSlots; 
-    };
-
-    struct VirtualizationInfo {
-        bool isVirtualMachine;
-        std::string hypervisorType; 
-    };
-
-    WinSystemInfo();
-    std::vector<NetworkInfo> getNetworkInfo();
-    CPUInfo getCPUInfo();
-    MemoryInfo getMemoryInfo();
-    VirtualizationInfo getVirtualizationInfo();
+enum class NetworkConnectionType {
+    Wired,
+    Wireless,
+    Unknown
 };
+
+enum class HypervisorType {
+    VMware,
+    HyperV,
+    VirtualBox,
+    KVM,
+    Xen,
+    Other,
+    NotVirtualized
+};
+
+
+struct CPUInfo {
+    std::string Manufacturer;
+    double FrequencyGHz;
+    std::string SerialNumber;
+    uint32_t CoreCount;
+    uint32_t ThreadCount;
+    bool VirtualizationEnabled;
+};
+
+struct RAMInfo {
+    uint64_t TotalMemoryMB;
+    std::string MemoryType;
+    uint32_t SpeedMHz;
+    uint32_t UsedSlots;
+    uint32_t FreeSlots;
+};
+
+struct NetworkInfo {
+    NetworkConnectionType ConnectionType;
+    std::string Protocol;
+};
+
+struct VirtualizationInfo {
+    bool IsVirtualized;
+    HypervisorType Type;
+};
+
+class SystemInfo {
+public:
+    SystemInfo();
+    ~SystemInfo();
+
+    bool Initialize();
+
+    bool GetNetworkInfo(std::vector<NetworkInfo>& networks);
+    bool GetCPUInfo(CPUInfo& cpuInfo);
+    bool GetRAMInfo(RAMInfo& ramInfo);
+    bool GetVirtualizationInfo(VirtualizationInfo& virtInfo);
+
+private:
+
+    bool InitializeCOM();
+    bool InitializeWMI();
+
+    IWbemLocator* pLoc;
+    IWbemServices* pSvc;
+};
+
