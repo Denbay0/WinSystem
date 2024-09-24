@@ -9,7 +9,7 @@ int main() {
         return 1;
     }
 
-    // Получение информации о CPU
+    // Информация о процессоре CPU
     CPUInfo cpu;
     if (sysInfo.GetCPUInfo(cpu)) {
         std::cout << "Производитель CPU: " << cpu.Manufacturer << std::endl;
@@ -17,26 +17,26 @@ int main() {
         std::cout << "Серийный номер CPU: " << cpu.SerialNumber << std::endl;
         std::cout << "Количество ядер CPU: " << cpu.CoreCount << std::endl;
         std::cout << "Количество потоков CPU: " << cpu.ThreadCount << std::endl;
-        std::cout << "Виртуализация включена: " << (cpu.VirtualizationEnabled ? "Да" : "Нет") << std::endl;
+        std::cout << "Виртуализация: " << (cpu.VirtualizationEnabled ? "Да" : "Нет") << std::endl;
     }
     else {
         std::cerr << "Не удалось получить информацию о CPU." << std::endl;
     }
 
-    // Получение информации о RAM
+    // Информация о RAM
     RAMInfo ram;
     if (sysInfo.GetRAMInfo(ram)) {
-        std::cout << "Общая ОЗУ: " << ram.TotalMemoryMB << " MB" << std::endl;
+        std::cout << "Объем памяти: " << ram.TotalMemoryMB << " MB" << std::endl;
         std::cout << "Тип памяти: " << ram.MemoryType << std::endl;
-        std::cout << "Скорость памяти: " << ram.SpeedMHz << " MHz" << std::endl;
-        std::cout << "Использованные слоты: " << ram.UsedSlots << std::endl;
-        std::cout << "Свободные слоты: " << ram.FreeSlots << std::endl;
+        std::cout << "Частота памяти: " << ram.SpeedMHz << " MHz" << std::endl;
+        std::cout << "Используемых слотов: " << ram.UsedSlots << std::endl;
+        std::cout << "Свободных слотов: " << ram.FreeSlots << std::endl;
     }
     else {
         std::cerr << "Не удалось получить информацию о RAM." << std::endl;
     }
 
-    // Получение информации о сетевых подключениях
+    // Информация о сетевых интерфейсах
     std::vector<NetworkInfo> networks;
     if (sysInfo.GetNetworkInfo(networks)) {
         for (const auto& net : networks) {
@@ -49,19 +49,19 @@ int main() {
                 std::cout << "Беспроводное";
                 break;
             default:
-                std::cout << "Неизвестно";
+                std::cout << "Неизвестное";
             }
             std::cout << ", Протокол: " << net.Protocol << std::endl;
         }
     }
     else {
-        std::cerr << "Не удалось получить информацию о сетевых подключениях." << std::endl;
+        std::cerr << "Не удалось получить информацию о сетевых интерфейсах." << std::endl;
     }
 
-    // Получение информации о виртуализации
+    // Информация о виртуализации
     VirtualizationInfo virt;
     if (sysInfo.GetVirtualizationInfo(virt)) {
-        std::cout << "Виртуализирована: " << (virt.IsVirtualized ? "Да" : "Нет") << std::endl;
+        std::cout << "Виртуализировано: " << (virt.IsVirtualized ? "Да" : "Нет") << std::endl;
         if (virt.IsVirtualized) {
             std::cout << "Тип гипервизора: ";
             switch (virt.Type) {
@@ -81,7 +81,7 @@ int main() {
                 std::cout << "Xen";
                 break;
             default:
-                std::cout << "Другое";
+                std::cout << "Неизвестно";
             }
             std::cout << std::endl;
         }
